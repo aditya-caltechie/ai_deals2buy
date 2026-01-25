@@ -147,10 +147,25 @@ class App:
                     yield log_data, output, final_result
 
             def do_select(selected_index: gr.SelectData):
-                opportunities = self.get_agent_framework().memory
+                framework = self.get_agent_framework()
+                # Ensure planner exists (it is normally created lazily on first run).
+                framework.init_agents_as_needed()
+
+                opportunities = framework.memory
                 row = selected_index.index[0]
+                if row >= len(opportunities):
+                    # Can happen if a select event fires while table is refreshing.
+                    logging.info("[UI] Selected row out of range; ignoring.")
+                    return
+
                 opportunity = opportunities[row]
-                self.get_agent_framework().planner.messenger.alert(opportunity)
+                planner = getattr(framework, "planner", None)
+                messenger = getattr(planner, "messenger", None) if planner else None
+                if messenger is None:
+                    logging.info("[UI] Messenger not available yet; ignoring selection.")
+                    return
+
+                messenger.alert(opportunity)
 
             with gr.Row():
                 gr.Markdown(
