@@ -28,24 +28,32 @@ This repo runs as a regular Python app (not an installed package). The code live
   - Ollama running locally for preprocessing (default base URL: `http://localhost:11434`)
   - Modal configured if you want to use the hosted fine-tuned specialist model
 
-### Install (pip)
+### Install + run (uv-only)
+
+This repo is standardized on `uv` and ships an `uv.lock` for reproducible installs.
+
+Steps for a fresh clone (uv-only):
+
+#### 1) Install uv (one time on your machine)
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Install (uv)
+#### 2) Clone + enter repo
 
-If you use `uv`, the repo includes `uv.lock` and a `pyproject.toml` dependency set:
+```bash
+git clone <repo-url>
+cd ai-deals2buy
+```
+
+#### 3) Sync dependencies
 
 ```bash
 uv sync
 ```
 
-### Configure (.env)
+#### 4) Configure (.env)
 
 Create a `.env` in the repo root. Common keys:
 
@@ -62,18 +70,23 @@ Notes:
 - You can run the UI without Pushover/Groq, but you'll lose push notifications (and message crafting).
 - If you enable the Modal-backed specialist estimator, you must have Modal configured locally (`modal` CLI auth + access to the deployed app).
 
-### Run the app (Gradio UI)
+#### 5) Run the app (Gradio UI)
 
 From the repo root:
 
 ```bash
-python3 src/main.py
+uv run python src/main.py
 ```
 
-Or with uv:
+#### Do you need to create a venv?
+
+No manual venv needed. `uv sync` will create/manage a project environment (commonly a local `.venv`) automatically, and `uv run ...` runs inside it.
+
+If you want to force the convention explicitly:
 
 ```bash
-uv run src/main.py
+uv venv
+uv sync
 ```
 
 ### Build/populate the vector DB (recommended on fresh runs)
@@ -81,25 +94,26 @@ uv run src/main.py
 The UI's 3D plot reads a persistent Chroma vector DB at `products_vectorstore/` (collection: `products`).
 
 ```bash
-python3 src/main.py --build-vectordb
+uv run python src/main.py --build-vectordb
 ```
 
 Optional flags:
 
 ```bash
 # Use the full dataset (slower)
-python3 src/main.py --build-vectordb --full-dataset
+uv run python src/main.py --build-vectordb --full-dataset
 
 # Delete and recreate the Chroma collection before ingesting
-python3 src/main.py --build-vectordb --force-recreate-vectordb
+uv run python src/main.py --build-vectordb --force-recreate-vectordb
 ```
 
 You can also run the builder directly:
 
 ```bash
 cd src
-python3 -m rag.vectorstore --lite       # items_lite (default)
-python3 -m rag.vectorstore --full       # items_full
+uv run python -m rag.vectorstore              # items_lite (default)
+uv run python -m rag.vectorstore --full       # items_full
+uv run python -m rag.vectorstore --force      # delete and recreate collection first
 ```
 
 ## How it works (at a glance)
@@ -163,14 +177,14 @@ This repo uses lightweight `unittest` + `unittest.mock` tests (no extra test dep
 From the repo root:
 
 ```bash
-python3 -m unittest -v
+uv run python -m unittest -v
 ```
 
 Run a single module:
 
 ```bash
-python3 -m unittest -v tests.test_framework
-python3 -m unittest -v tests.test_agents
+uv run python -m unittest -v tests.test_framework
+uv run python -m unittest -v tests.test_agents
 ```
 
 See `tests/README.md` for details on what is covered.

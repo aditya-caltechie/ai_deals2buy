@@ -103,13 +103,7 @@ Common keys (create a `.env` in repo root; `src/main.py` loads it with `override
 ### App (Gradio UI)
 
 ```bash
-python3 src/main.py
-```
-
-If you use `uv`:
-
-```bash
-uv run src/main.py
+uv run python src/main.py
 ```
 
 ### Build/populate the vector DB (recommended on fresh runs)
@@ -117,37 +111,26 @@ uv run src/main.py
 `products_vectorstore/` is a persistent Chroma DB used by the frontier RAG estimator and the UI plot.
 
 ```bash
-python3 src/main.py --build-vectordb
+uv run python src/main.py --build-vectordb
 ```
 
 Optional flags:
 
 ```bash
 # Use the full dataset (slower)
-python3 src/main.py --build-vectordb --full-dataset
+uv run python src/main.py --build-vectordb --full-dataset
 
 # Delete and recreate the Chroma collection before ingesting
-python3 src/main.py --build-vectordb --force-recreate-vectordb
+uv run python src/main.py --build-vectordb --force-recreate-vectordb
 ```
 
 ---
 
 ## Dependencies & tooling
 
-- **Dependency sources**:
-  - `requirements.txt` (pip)
-  - `pyproject.toml` + `uv.lock` (uv)
+Dependencies are managed via `pyproject.toml` and the lockfile `uv.lock`.
 
-Install via pip:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-Install via uv:
+Install via `uv`:
 
 ```bash
 uv sync
@@ -162,14 +145,14 @@ Tests are `unittest`-based and mock external services (no network required).
 Run all tests:
 
 ```bash
-python3 -m unittest -v
+uv run python -m unittest -v
 ```
 
 Run individual test modules:
 
 ```bash
-python3 -m unittest -v tests.test_framework
-python3 -m unittest -v tests.test_agents
+uv run python -m unittest -v tests.test_framework
+uv run python -m unittest -v tests.test_agents
 ```
 
 See `tests/README.md` for details on coverage and design goals.

@@ -7,20 +7,20 @@ This repo uses lightweight **unittest + unittest.mock** tests (no extra dependen
 From the repo root:
 
 ```bash
-python3 -m unittest -v
+uv run python -m unittest -v
 ```
 
 Or run a single file:
 
 ```bash
-python3 -m unittest -v tests.test_framework
-python3 -m unittest -v tests.test_agents
+uv run python -m unittest -v tests.test_framework
+uv run python -m unittest -v tests.test_agents
 ```
 
 Or run a single test method:
 
 ```bash
-python3 -m unittest -v tests.test_framework.TestDealAgentFramework.test_planner_selection_workflow
+uv run python -m unittest -v tests.test_framework.TestDealAgentFramework.test_planner_selection_workflow
 ```
 
 ### What the tests cover
