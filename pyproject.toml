@@ -1,7 +1,9 @@
 [project]
 name = "llm-engineering"
 version = "0.1.0"
-requires-python = ">=3.11"
+# Some transitive deps (e.g., onnxruntime) do not yet publish wheels for Python 3.14.
+# Constrain the supported range so first-time `uv sync` works reliably.
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "anthropic>=0.69.0",
     "beautifulsoup4>=4.14.2",
@@ -40,7 +42,10 @@ dependencies = [
     "setuptools>=80.9.0",
     "speedtest-cli>=2.1.3",
     "tiktoken>=0.11.0",
-    "torch>=2.8.0",
+    # NOTE: torch==2.10.0 (released 2026-01) does not ship an installable wheel for
+    # macOS 13 arm64, which breaks `uv sync` for first-time users on that platform.
+    # Constrain torch until the upstream packaging/wheel situation is resolved.
+    "torch>=2.8.0,<2.10.0",
     "tqdm>=4.67.1",
     "transformers>=4.56.2",
     "wandb>=0.22.1",

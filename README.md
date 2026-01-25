@@ -23,7 +23,7 @@ This repo runs as a regular Python app (not an installed package). The code live
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.11–3.13 (Python 3.14 is not supported yet; some deps like `onnxruntime` don’t ship 3.14 wheels)
 - Optional but recommended:
   - Ollama running locally for preprocessing (default base URL: `http://localhost:11434`)
   - Modal configured if you want to use the hosted fine-tuned specialist model
@@ -191,6 +191,7 @@ See `tests/README.md` for details on what is covered.
 
 ## Notes / troubleshooting
 
+- If `uv sync` fails on macOS 13 arm64 with a Torch wheel error, it’s due to upstream `torch` wheel availability; this repo pins Torch to `<2.10.0` to keep installs working.
 - The 3D plot uses t-SNE; it needs at least 31 items in the vector DB.
 - `memory.json` stores surfaced opportunities so you don't alert on the same deal repeatedly.
 - If you don't have Modal configured, the `SpecialistAgent` will fail to connect; use `docs/README.md` to decide whether to stub/disable it for local-only runs.
