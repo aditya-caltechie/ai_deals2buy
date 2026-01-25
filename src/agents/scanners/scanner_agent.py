@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from openai import OpenAI
 
-from agents.agent import Agent
+from agents.base import Agent
 from data.models import DealSelection
 from scraping.rss_scraper import ScrapedDeal
 

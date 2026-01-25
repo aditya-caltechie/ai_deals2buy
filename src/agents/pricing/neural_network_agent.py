@@ -1,4 +1,4 @@
-from agents.agent import Agent
+from agents.base import Agent
 from models.neural_network import DeepNeuralNetworkInference
 
 

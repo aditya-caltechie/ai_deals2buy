@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from agents.agent import Agent
+from agents.base import Agent
 from data.models import Deal, Opportunity
 from agents.messaging.messaging_agent import MessagingAgent
 from agents.pricing.ensemble_agent import EnsembleAgent

@@ -1,4 +1,4 @@
-from agents.agent import Agent
+from agents.base import Agent
 from agents.preprocessing.preprocessor import Preprocessor
 from agents.pricing.frontier_agent import FrontierAgent
 from agents.pricing.specialist_agent import SpecialistAgent

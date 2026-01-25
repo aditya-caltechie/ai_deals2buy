@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from openai import OpenAI
 
-from agents.agent import Agent
+from agents.base import Agent
 from rag.retriever import ChromaRetriever
 
 

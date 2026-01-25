@@ -2,7 +2,7 @@ import os
 
 from litellm import completion
 
-from agents.agent import Agent
+from agents.base import Agent
 from data.models import Opportunity
 from services.notifications.pushover import PushoverClient
 

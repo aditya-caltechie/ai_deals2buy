@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from core.framework import DealAgentFramework
 from ui.app import App
-from agents.rag_vectordb import ensure_products_vectordb
+from rag.vectorstore import ensure_products_vectordb
 
 if __name__ == "__main__":
     root = logging.getLogger()
