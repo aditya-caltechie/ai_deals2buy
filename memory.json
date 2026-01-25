@@ -1,0 +1,29 @@
+[
+  {
+    "deal": {
+      "product_description": "Bellroy leather phone case made specifically for the Google Pixel 8, constructed from premium Leather Working Group\u2013rated leather with aluminum buttons for durability. The case offers a slim profile with a soft-lined interior to protect the phone, maintains wireless charging compatibility, and provides refined leather craftsmanship and edge protection while preserving phone functionality.",
+      "price": 10.0,
+      "url": "https://www.dealnews.com/products/Bellroy/Bellroy-Google-Pixel-8-Leather-Phone-Case/497403.html?iref=rss-c142"
+    },
+    "estimate": 59.0,
+    "discount": 49.0
+  },
+  {
+    "deal": {
+      "product_description": "Roborock Qrevo Series QV 35S robot vacuum and mop with 10,000Pa suction, smart navigation and app control. The unit features a self\u2011emptying base, dynamic mopping, a dual anti\u2011tangle system to handle hair and debris, and onboard mapping for efficient room coverage. Model: QV 35S.",
+      "price": 450.0,
+      "url": "https://www.dealnews.com/products/Roborock/Roborock-Qrevo-Series-QV-35-S-10-000-Pa-Robot-Vacuum-Mop/497408.html?iref=rss-f1912"
+    },
+    "estimate": 779.0,
+    "discount": 329.0
+  },
+  {
+    "deal": {
+      "product_description": "Roborock Q10 X5+ robot vacuum and mop with a self-emptying base. It offers smart navigation, carpet detection, obstacle avoidance and strong 10,000 Pa suction power for deep cleaning. The combo vacuum/mop is designed for hands\u2011off floor care with features targeted at maintaining mixed hard\u2011floor and carpeted homes.",
+      "price": 280.0,
+      "url": "https://www.dealnews.com/products/Roborock/Roborock-Q10-X5-Robot-Vacuum-and-Mop/497409.html?iref=rss-f1912"
+    },
+    "estimate": 699.0,
+    "discount": 419.0
+  }
+]
