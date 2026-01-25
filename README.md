@@ -98,8 +98,8 @@ You can also run the builder directly:
 
 ```bash
 cd src
-python3 -m agents.rag_vectordb          # lite dataset (default)
-python3 -m agents.rag_vectordb --full   # full dataset
+python3 -m rag.vectorstore --lite       # items_lite (default)
+python3 -m rag.vectorstore --full       # items_full
 ```
 
 ## How it works (at a glance)
