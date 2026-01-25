@@ -1,71 +1,124 @@
-# ai-deals2buy
+# ai-deals2buy — “The Price is Right” deal-hunting agent framework
 
-## First-time setup (after cloning)
+An **agentic price-estimation + deal-alert system** with a **Gradio UI**.
 
-### Create and activate a virtual environment
+It periodically:
+- **Scrapes deal RSS feeds** (DealNews)
+- Uses an LLM to **select and summarize the best deals** with a clear price
+- Estimates a “true value” using an **ensemble**:
+  - **Specialist model**: a **fine-tuned Llama 3.2 3B** hosted on **Modal**
+  - **Frontier model**: an **OpenAI model** using **RAG over a Chroma vector DB**
+  - (Optional) local preprocessing via **Ollama**
+- Computes discount = estimated value − deal price
+- Sends a **push notification** when a deal crosses a threshold
 
-From the repo root:
+The code lives in `src/` and runs as a regular Python app (not an installed package).
+
+For a detailed architecture diagram and end-to-end flow, see `docs/README.md`.
+
+## What happens when you run it
+
+`src/main.py` loads env vars, resets persisted memory, optionally builds a vector DB, then launches the Gradio UI.
+
+The UI (`src/price_is_right.py`) runs the agent pipeline on startup and then every 5 minutes via `gr.Timer`.
+
+Core orchestration happens in `src/deal_agent_framework.py`:
+- loads previous surfaced opportunities from `memory.json`
+- opens Chroma DB `products_vectorstore/` (collection `products`)
+- chooses one of two planner modes via `PLANNER_MODE`
+
+## Planner modes
+
+Both modes use the same underlying agents (`ScannerAgent`, `EnsembleAgent`, `MessagingAgent`) but orchestrate them differently.
+
+- **Workflow mode** (`PLANNER_MODE=workflow`): deterministic pipeline in `src/agents/planning_agent.py`
+  - scan → price top 5 → pick best → notify if `discount > PlanningAgent.DEAL_THRESHOLD`
+- **Tool-loop mode** (`PLANNER_MODE=autonomous`, default): LLM function-calling loop in `src/agents/autonomous_planning_agent.py`
+  - the planner LLM decides which tool to call next (scan / estimate / notify) until it finishes
+
+## Models and providers (as implemented)
+
+- **Deal selection + summarization**: OpenAI `gpt-5-mini` via `openai` SDK (`ScannerAgent`)
+- **Tool-loop planner** (autonomous mode): OpenAI `gpt-5.1` via `openai` SDK (`AutonomousPlanningAgent`)
+- **Frontier estimator** (RAG + reasoning): OpenAI `gpt-5.1` via `openai` SDK (`FrontierAgent`)
+- **Text preprocessor / rewrite**: defaults to local `ollama/llama3.2` via `litellm` (`Preprocessor`)
+- **Notification copywriting**: `groq/openai/gpt-oss-20b` via `litellm` (`MessagingAgent`)
+- **Specialist estimator**: fine-tuned `meta-llama/Llama-3.2-3B` on **Modal** (`SpecialistAgent`)
+- **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2`
+
+## Tech stack
+
+- **UI**: Gradio, Plotly
+- **Agents / orchestration**: custom agent classes + OpenAI tool calling
+- **RAG / vector DB**: ChromaDB + SentenceTransformers embeddings
+- **Data ingestion**: HuggingFace `datasets` (vector DB build), RSS via `feedparser`, HTML parsing via BeautifulSoup
+- **Notifications**: Pushover (HTTP API), message generation via LiteLLM (Groq)
+- **ML/vis**: scikit-learn (t-SNE for 3D plot), NumPy
+- **Serving specialist model**: Modal + Transformers + PEFT + bitsandbytes
+
+## Repo layout (high level)
+
+- `src/main.py`: CLI entrypoint (dotenv, reset memory, optional vector DB build, launch UI)
+- `src/price_is_right.py`: Gradio app + timer-driven runs + 3D embedding visualization
+- `src/deal_agent_framework.py`: orchestrator, planner selection, Chroma + memory persistence, t-SNE plot data
+- `src/agents/`: agent implementations (scanner, planners, pricing ensemble, notifications, vector DB builder)
+- `src/modalApp/`: Modal app(s) used to host the fine-tuned “specialist” model
+
+## Setup
+
+### Requirements
+
+- **Python**: 3.11+
+- Optional but recommended:
+  - **Ollama** running locally (for preprocessing) on `http://localhost:11434`
+  - A **Modal** account configured if you want to use the hosted fine-tuned specialist model
+
+### Install (pip)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-```
-
-### Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### Environment variables
+### Install (uv)
 
-Create a `.env` file in the repo root and add any required keys (example keys used in notebooks/agents include `HF_TOKEN` and API keys for your LLM provider).
+If you use `uv`, the repo includes `uv.lock` and a `pyproject.toml` dependency set:
+
+```bash
+uv sync
+```
+
+## Configuration (.env)
+
+Create a `.env` in the repo root. Common keys:
+
+- **OpenAI**: `OPENAI_API_KEY` (used by `ScannerAgent`, `FrontierAgent`, `AutonomousPlanningAgent`)
+- **Pushover** (push notifications): `PUSHOVER_USER`, `PUSHOVER_TOKEN`
+- **Groq** (via LiteLLM): `GROQ_API_KEY` (recommended if using `groq/openai/gpt-oss-20b`)
+- **HuggingFace** (vector DB dataset download): `HF_TOKEN`
+- **Dataset source override** (optional): `HF_DATASET_USER` (defaults to `ed-donner`)
+- **Planner selection**: `PLANNER_MODE=workflow` or `PLANNER_MODE=autonomous`
+- **Preprocessor model** (optional): `PRICER_PREPROCESSOR_MODEL` (default `ollama/llama3.2`)
 
 ## Run the app (Gradio UI)
 
-From the repo root:
+From repo root:
 
 ```bash
 python3 src/main.py
 ```
 
-## Planner modes (workflow vs tool-loop)
-
-This project supports **two different planning pipelines** (both are orchestrated by `DealAgentFramework`):
-
-- **Workflow mode (`PlanningAgent`)**: a more deterministic “pipeline/workflow”.
-  - **Flow**: scan deals → price top deals → pick best → notify if discount > threshold.
-  - **Where**: `src/agents/planning_agent.py`
-  - **Tuning**: `PlanningAgent.DEAL_THRESHOLD` controls when a notification is sent.
-
-- **Tool-loop mode (`AutonomousPlanningAgent`)**: an LLM-driven execution loop using function-calling tools.
-  - **Flow**: the LLM decides which tool to call next (scan → estimate → notify) until it finishes.
-  - **Where**: `src/agents/autonomous_planning_agent.py`
-  - **Tuning**: `AutonomousPlanningAgent.MODEL` controls the model; requires your LLM provider credentials.
-
-### How to switch modes
-
-Set `PLANNER_MODE` (in your `.env` or shell) and run the app normally:
-
-- **Workflow mode**:
+Or with uv:
 
 ```bash
-export PLANNER_MODE=workflow
-python3 src/main.py
+uv run src/main.py
 ```
 
-- **Tool-loop mode (default)**:
-
-```bash
-export PLANNER_MODE=autonomous
-python3 src/main.py
-```
-
-### Populate the vector DB (recommended on fresh runs)
+## Build/populate the vector DB (recommended on fresh runs)
 
 The UI’s 3D plot reads a persistent Chroma vector DB at `products_vectorstore/` (collection: `products`).
-On a fresh machine/checkout (or if you deleted `products_vectorstore/`), build it first:
 
 ```bash
 python3 src/main.py --build-vectordb
@@ -81,10 +134,16 @@ python3 src/main.py --build-vectordb --full-dataset
 python3 src/main.py --build-vectordb --force-recreate-vectordb
 ```
 
-### Build the vector DB directly (optional)
+You can also run the builder directly:
 
 ```bash
 cd src
 python3 -m agents.rag_vectordb          # lite dataset (default)
 python3 -m agents.rag_vectordb --full   # full dataset
 ```
+
+## Notes / troubleshooting
+
+- The 3D plot uses t-SNE; it needs **at least 31 items** in the vector DB.
+- `memory.json` stores the surfaced opportunities so you don’t alert on the same deal repeatedly.
+- If you don’t have Modal configured, the `SpecialistAgent` will fail to connect; use the docs to decide whether to stub/disable it for local-only runs.
