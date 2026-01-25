@@ -5,7 +5,7 @@ import json
 from typing import List
 from dotenv import load_dotenv
 import chromadb
-#from agents.planning_agent import PlanningAgent
+from agents.planning_agent import PlanningAgent
 from agents.autonomous_planning_agent import AutonomousPlanningAgent
 from agents.deals import Opportunity
 from sklearn.manifold import TSNE
@@ -60,8 +60,14 @@ class DealAgentFramework:
     def init_agents_as_needed(self):
         if not self.planner:
             self.log("Initializing Agent Framework")
-            #self.planner = PlanningAgent(self.collection)
-            self.planner = AutonomousPlanningAgent(self.collection)
+            mode = os.environ.get("PLANNER_MODE", "autonomous").strip().lower()
+            if mode in ("workflow", "planning", "planning_agent", "plan"):
+                self.planner = PlanningAgent(self.collection)
+                self.log("Using PlanningAgent (workflow mode)")
+            else:
+                # Default: tool / execution-loop style planner (LLM function-calling)
+                self.planner = AutonomousPlanningAgent(self.collection)
+                self.log("Using AutonomousPlanningAgent (tool-loop mode)")
             self.log("Agent Framework is ready")
 
     def read_memory(self) -> List[Opportunity]:

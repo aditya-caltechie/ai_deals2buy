@@ -30,6 +30,38 @@ From the repo root:
 python3 src/main.py
 ```
 
+## Planner modes (workflow vs tool-loop)
+
+This project supports **two different planning pipelines** (both are orchestrated by `DealAgentFramework`):
+
+- **Workflow mode (`PlanningAgent`)**: a more deterministic “pipeline/workflow”.
+  - **Flow**: scan deals → price top deals → pick best → notify if discount > threshold.
+  - **Where**: `src/agents/planning_agent.py`
+  - **Tuning**: `PlanningAgent.DEAL_THRESHOLD` controls when a notification is sent.
+
+- **Tool-loop mode (`AutonomousPlanningAgent`)**: an LLM-driven execution loop using function-calling tools.
+  - **Flow**: the LLM decides which tool to call next (scan → estimate → notify) until it finishes.
+  - **Where**: `src/agents/autonomous_planning_agent.py`
+  - **Tuning**: `AutonomousPlanningAgent.MODEL` controls the model; requires your LLM provider credentials.
+
+### How to switch modes
+
+Set `PLANNER_MODE` (in your `.env` or shell) and run the app normally:
+
+- **Workflow mode**:
+
+```bash
+export PLANNER_MODE=workflow
+python3 src/main.py
+```
+
+- **Tool-loop mode (default)**:
+
+```bash
+export PLANNER_MODE=autonomous
+python3 src/main.py
+```
+
 ### Populate the vector DB (recommended on fresh runs)
 
 The UI’s 3D plot reads a persistent Chroma vector DB at `products_vectorstore/` (collection: `products`).

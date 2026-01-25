@@ -1,1 +1,6 @@
 .env
+products_vectorstore/
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
