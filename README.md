@@ -20,9 +20,9 @@ For a detailed architecture diagram and end-to-end flow, see `docs/README.md`.
 
 `src/main.py` loads env vars, resets persisted memory, optionally builds a vector DB, then launches the Gradio UI.
 
-The UI (`src/price_is_right.py`) runs the agent pipeline on startup and then every 5 minutes via `gr.Timer`.
+The UI (`src/ui/app.py`) runs the agent pipeline on startup and then every 5 minutes via `gr.Timer`.
 
-Core orchestration happens in `src/deal_agent_framework.py`:
+Core orchestration happens in `src/core/framework.py`:
 - loads previous surfaced opportunities from `memory.json`
 - opens Chroma DB `products_vectorstore/` (collection `products`)
 - chooses one of two planner modes via `PLANNER_MODE`
@@ -31,9 +31,9 @@ Core orchestration happens in `src/deal_agent_framework.py`:
 
 Both modes use the same underlying agents (`ScannerAgent`, `EnsembleAgent`, `MessagingAgent`) but orchestrate them differently.
 
-- **Workflow mode** (`PLANNER_MODE=workflow`): deterministic pipeline in `src/agents/planning_agent.py`
+- **Workflow mode** (`PLANNER_MODE=workflow`): deterministic pipeline in `src/agents/planners/planning_agent.py`
   - scan → price top 5 → pick best → notify if `discount > PlanningAgent.DEAL_THRESHOLD`
-- **Tool-loop mode** (`PLANNER_MODE=autonomous`, default): LLM function-calling loop in `src/agents/autonomous_planning_agent.py`
+- **Tool-loop mode** (`PLANNER_MODE=autonomous`, default): LLM function-calling loop in `src/agents/planners/autonomous_planning_agent.py`
   - the planner LLM decides which tool to call next (scan / estimate / notify) until it finishes
 
 ## Models and providers (as implemented)
@@ -59,10 +59,10 @@ Both modes use the same underlying agents (`ScannerAgent`, `EnsembleAgent`, `Mes
 ## Repo layout (high level)
 
 - `src/main.py`: CLI entrypoint (dotenv, reset memory, optional vector DB build, launch UI)
-- `src/price_is_right.py`: Gradio app + timer-driven runs + 3D embedding visualization
-- `src/deal_agent_framework.py`: orchestrator, planner selection, Chroma + memory persistence, t-SNE plot data
+- `src/ui/app.py`: Gradio app + timer-driven runs + 3D embedding visualization
+- `src/core/framework.py`: orchestrator, planner selection, Chroma + memory persistence, t-SNE plot data
 - `src/agents/`: agent implementations (scanner, planners, pricing ensemble, notifications, vector DB builder)
-- `src/modalApp/`: Modal app(s) used to host the fine-tuned “specialist” model
+- `src/services/modal/`: Modal app(s) used to host the fine-tuned “specialist” model
 
 ## Setup
 
@@ -101,6 +101,10 @@ Create a `.env` in the repo root. Common keys:
 - **Dataset source override** (optional): `HF_DATASET_USER` (defaults to `ed-donner`)
 - **Planner selection**: `PLANNER_MODE=workflow` or `PLANNER_MODE=autonomous`
 - **Preprocessor model** (optional): `PRICER_PREPROCESSOR_MODEL` (default `ollama/llama3.2`)
+
+Notes:
+- You can run the UI without Pushover/Groq, but you’ll lose push notifications (and message crafting).
+- If you enable the Modal-backed specialist estimator, you must have Modal configured locally (`modal` CLI auth + access to the deployed app).
 
 ## Run the app (Gradio UI)
 

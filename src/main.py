@@ -8,8 +8,8 @@ import sys
 
 from dotenv import load_dotenv
 
-from deal_agent_framework import DealAgentFramework
-from price_is_right import App
+from core.framework import DealAgentFramework
+from ui.app import App
 from agents.rag_vectordb import ensure_products_vectordb
 
 if __name__ == "__main__":

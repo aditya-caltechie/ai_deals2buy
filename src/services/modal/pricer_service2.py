@@ -1,5 +1,6 @@
 import modal
-from modal import Volume, Image
+from modal import Image, Volume
+
 # Setup - define our infrastructure with code!
 
 app = modal.App("pricer-service")
@@ -42,8 +43,8 @@ class Pricer:
     @modal.enter()
     def setup(self):
         import torch
-        from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
         from peft import PeftModel
+        from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
         # Quant Config
         quant_config = BitsAndBytesConfig(
@@ -67,6 +68,7 @@ class Pricer:
     @modal.method()
     def price(self, description: str) -> float:
         import re
+
         import torch
         from transformers import set_seed
 
@@ -81,3 +83,4 @@ class Pricer:
         contents = contents.replace(",", "")
         match = re.search(r"[-+]?\d*\.\d+|\d+", contents)
         return float(match.group()) if match else 0
+

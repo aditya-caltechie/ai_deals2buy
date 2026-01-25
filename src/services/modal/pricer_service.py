@@ -1,12 +1,15 @@
 import modal
 from modal import Image
 
-# Setup
+# Setup - define our infrastructure with code!
 
-app = modal.App("pricer")
+app = modal.App("pricer-service")
 image = Image.debian_slim().pip_install(
     "torch", "transformers", "bitsandbytes", "accelerate", "peft"
 )
+
+# This collects the secret from Modal.
+# Depending on your Modal configuration, you may need to replace "huggingface-secret" with "hf-secret"
 secrets = [modal.Secret.from_name("huggingface-secret")]
 
 # Constants
@@ -24,9 +27,15 @@ FINETUNED_MODEL = f"{HF_USER}/{PROJECT_RUN_NAME}"
 @app.function(image=image, secrets=secrets, gpu=GPU, timeout=1800)
 def price(description: str) -> float:
     import re
+
     import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, set_seed
     from peft import PeftModel
+    from transformers import (
+        AutoModelForCausalLM,
+        AutoTokenizer,
+        BitsAndBytesConfig,
+        set_seed,
+    )
 
     PREFIX = "Price is $"
     QUESTION = "What does this cost to the nearest dollar?"
@@ -42,7 +51,6 @@ def price(description: str) -> float:
     )
 
     # Load model and tokenizer
-
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
@@ -62,3 +70,4 @@ def price(description: str) -> float:
     contents = contents.replace(",", "")
     match = re.search(r"[-+]?\d*\.\d+|\d+", contents)
     return float(match.group()) if match else 0
+
