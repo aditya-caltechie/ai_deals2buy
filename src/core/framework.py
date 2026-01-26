@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import List
 
 import chromadb
@@ -35,7 +36,8 @@ def init_logging():
 
 class DealAgentFramework:
     DB = "products_vectorstore"
-    MEMORY_FILENAME = "memory.json"
+    # Always persist memory inside `src/` regardless of current working directory.
+    MEMORY_FILENAME = str(Path(__file__).resolve().parents[1] / "memory.json")
 
     def __init__(self):
         init_logging()
