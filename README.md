@@ -183,8 +183,8 @@ uv run python -m unittest -v
 Run a single module:
 
 ```bash
-uv run python -m unittest -v tests.test_framework
-uv run python -m unittest -v tests.test_agents
+uv run python -m unittest -v tests.integration.test_framework
+uv run python -m unittest -v tests.unit.test_agents
 ```
 
 See `tests/README.md` for details on what is covered.

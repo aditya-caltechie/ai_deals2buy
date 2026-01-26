@@ -33,7 +33,9 @@ class TestAgents(unittest.TestCase):
                 {"product_description": "prod5", "price": 50.0, "url": "https://b"},
             ]
         )
-        fake_response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=parsed))])
+        fake_response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(parsed=parsed))]
+        )
 
         fake_openai = MagicMock()
         fake_openai.chat.completions.parse.return_value = fake_response
