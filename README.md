@@ -19,6 +19,15 @@ On a repeating schedule, the app:
 
 This repo runs as a regular Python app (not an installed package). The code lives in `src/`.
 
+## Diagrams
+
+![Architecture diagram](docs/architecture.svg)
+
+![End-to-end workflow](docs/agent_workflow.svg)
+
+- For a written walk-through of the components and responsibilities, see `architecture.md`.
+- For the step-by-step runtime flow (UI timer → agents → notification → persistence), see `workflow-e2e.md`.
+
 ## Quick start
 
 ### Requirements
