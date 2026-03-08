@@ -204,3 +204,10 @@ See `tests/README.md` for details on what is covered.
 - The 3D plot uses t-SNE; it needs at least 31 items in the vector DB.
 - `memory.json` stores surfaced opportunities so you don't alert on the same deal repeatedly.
 - If you don't have Modal configured, the `SpecialistAgent` will fail to connect; use `docs/README.md` to decide whether to stub/disable it for local-only runs.
+
+## Reference
+- https://github.com/aditya-caltechie/ai-langchain-intro
+- https://github.com/aditya-caltechie/ai-tutorial-notes
+- https://github.com/aditya-caltechie/ai-fine-tuning
+- https://github.com/aditya-caltechie/ai-deep-learning
+- https://github.com/aditya-caltechie/ai-rag
