@@ -207,7 +207,6 @@ See `tests/README.md` for details on what is covered.
 
 ## Reference
 - https://github.com/aditya-caltechie/ai-langchain-intro
-- https://github.com/aditya-caltechie/ai-tutorial-notes
 - https://github.com/aditya-caltechie/ai-fine-tuning
 - https://github.com/aditya-caltechie/ai-deep-learning
 - https://github.com/aditya-caltechie/ai-rag
