@@ -263,3 +263,11 @@ See `tests/README.md` for details on what is covered.
 - https://github.com/aditya-caltechie/ai-deep-learning
 - https://github.com/aditya-caltechie/ai-rag
 
+#### Focus:
+- Ensemble Agent. All three agents.
+- Specially Specialist Agent - How deployed fine-tuned model on modal.com and used for inference.
+- Fine tuned using peft (LoraConfig) and trl (SFTTrainer) on T4 and then deployed to Modal. See [week-7](https://github.com/aditya-caltechie/ai-tutorial-notes/blob/main/llm-core/Week-7%20(fine-tuning).docx) and [week-8](https://github.com/aditya-caltechie/ai-tutorial-notes/blob/main/llm-core/Week-8%20(Capstone-project).docx)
+- Inference for price prediction. [Code](https://github.com/aditya-caltechie/ai-fine-tuning/tree/main/src/udemy) 
+- Frontiner model with RAG
+- Optional NN model for price detection.
+- Concept of Workflows, Agents
