@@ -21,7 +21,59 @@ This repo runs as a regular Python app (not an installed package). The code live
 
 ## Diagrams
 
-![Architecture diagram](docs/images/architecture.svg)
+Architecture (high level):
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ USER INTERFACE                                                               │
+│   Gradio UI (src/ui/app.py)                                                  │
+│   - runs on startup + every 5 minutes (gr.Timer)                             │
+└───────────────────────────────────────────┬──────────────────────────────────┘
+                                            │ triggers run
+                                            v
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ORCHESTRATION                                                                │
+│   DealAgentFramework (src/core/framework.py)                                 │
+│   - loads/writes memory: src/memory.json                                     │
+│   - opens vector DB: products_vectorstore/ (Chroma, collection: products)    │
+│   - selects planner: PLANNER_MODE=workflow|autonomous                        │
+└───────────────────────────────────────────┬──────────────────────────────────┘
+                                            │ plans + coordinates
+                                            v
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ AGENTS                                                                       │
+│   ScannerAgent                                                               │
+│   - RSS scrape + OpenAI Structured Outputs -> DealSelection (top 5 deals)    │
+│                                                                              │
+│   EnsembleAgent (true-value estimator)                                       │
+│   - Preprocessor (LiteLLM; optional local Ollama)                            │
+│   - FrontierAgent (RAG: ChromaDB retrieval + OpenAI price estimate)          │
+│   - SpecialistAgent (Modal fine-tuned pricer)                                │
+│   - NeuralNetworkAgent (optional; currently disabled in code)                │
+│                                                                              │
+│   MessagingAgent                                                             │
+│   - craft copy via Groq (LiteLLM) -> send push via Pushover                  │
+└───────────────────────────────────────────┬──────────────────────────────────┘
+                                            │ reads/writes + calls services
+                                            v
+┌───────────────────────────────────────────┐     ┌───────────────────────────────────────────┐
+│ STATE / STORAGE                           │     │ EXTERNAL SERVICES / MODELS                │
+│   src/memory.json                         │     │   OpenAI (ScannerAgent)                   │
+│   - persisted opportunities (dedupe)      │     │   - deal selection (Structured Outputs)   │
+│                                           │     │                                           │
+│   ChromaDB (persistent)                   │     │   OpenAI (FrontierAgent)                  │
+│   - products_vectorstore/                 │     │   - frontier pricing with RAG context     │
+│   - collection: products                  │     │                                           │
+│   - used for RAG + UI 3D plot             │     │   Modal (SpecialistAgent)                 │
+│                                           │     │   - fine-tuned specialist pricing model   │
+│                                           │     │                                           │
+│                                           │     │   Ollama (Preprocessor, optional local)   │
+│                                           │     │   - rewrite/normalize product text        │
+│                                           │     │                                           │
+│                                           │     │   Groq (MessagingAgent) + Pushover        │
+│                                           │     │   - craft message + deliver push          │
+└───────────────────────────────────────────┘     └───────────────────────────────────────────┘
+```
 
 ![End-to-end workflow](docs/images/agent_workflow.svg)
 
