@@ -1,13 +1,11 @@
-import json
-from typing import Dict, List, Optional
-
+from typing import Optional, List, Dict
+from agents.agent import Agent
+from agents.deals import Deal, Opportunity
+from agents.scanner_agent import ScannerAgent
+from agents.ensemble_agent import EnsembleAgent
+from agents.messaging_agent import MessagingAgent
 from openai import OpenAI
-
-from agents.base import Agent
-from data.models import Deal, Opportunity
-from agents.messaging.messaging_agent import MessagingAgent
-from agents.pricing.ensemble_agent import EnsembleAgent
-from agents.scanners.scanner_agent import ScannerAgent
+import json
 
 
 class AutonomousPlanningAgent(Agent):
@@ -26,10 +24,6 @@ class AutonomousPlanningAgent(Agent):
         self.openai = OpenAI()
         self.memory = None
         self.opportunity = None
-        # In autonomous mode, the LLM may decide not to call notify().
-        # Keep enough state to still surface "best deal found" in the UI.
-        self.last_selection = None
-        self.estimates_by_description: dict[str, float] = {}
         self.log("Autonomous Planning Agent is ready")
 
     def scan_the_internet_for_bargains(self) -> str:
@@ -38,7 +32,6 @@ class AutonomousPlanningAgent(Agent):
         """
         self.log("Autonomous Planning agent is calling scanner")
         results = self.scanner.scan(memory=self.memory)
-        self.last_selection = results
         return results.model_dump_json() if results else "No deals found"
 
     def estimate_true_value(self, description: str) -> str:
@@ -47,9 +40,7 @@ class AutonomousPlanningAgent(Agent):
         """
         self.log("Autonomous Planning agent is estimating value via Ensemble Agent")
         estimate = self.ensemble.price(description)
-        self.estimates_by_description[description] = float(estimate)
-        # Return structured-ish content to make the next LLM step reliable.
-        return json.dumps({"description": description, "estimated_true_value": float(estimate)})
+        return f"The estimated true value of {description} is {estimate}"
 
     def notify_user_of_deal(
         self, description: str, deal_price: float, estimated_true_value: float, url: str
@@ -58,9 +49,7 @@ class AutonomousPlanningAgent(Agent):
         Run the tool to notify the user
         """
         if self.opportunity:
-            self.log(
-                "Autonomous Planning agent is trying to notify the user a 2nd time; ignoring"
-            )
+            self.log("Autonomous Planning agent is trying to notify the user a 2nd time; ignoring")
         else:
             self.log("Autonomous Planning agent is notifying user")
             self.messenger.notify(description, deal_price, estimated_true_value, url)
@@ -151,9 +140,7 @@ class AutonomousPlanningAgent(Agent):
             arguments = json.loads(tool_call.function.arguments)
             tool = mapping.get(tool_name)
             result = tool(**arguments) if tool else ""
-            results.append(
-                {"role": "tool", "content": result, "tool_call_id": tool_call.id}
-            )
+            results.append({"role": "tool", "content": result, "tool_call_id": tool_call.id})
         return results
 
     system_message = "You find great deals on bargain products using your tools, and notify the user of the best bargain."
@@ -176,8 +163,6 @@ class AutonomousPlanningAgent(Agent):
         self.log("Autonomous Planning Agent is kicking off a run")
         self.memory = memory
         self.opportunity = None
-        self.last_selection = None
-        self.estimates_by_description = {}
         messages = self.messages[:]
         done = False
         while not done:
@@ -193,35 +178,4 @@ class AutonomousPlanningAgent(Agent):
                 done = True
         reply = response.choices[0].message.content
         self.log(f"Autonomous Planning Agent completed with: {reply}")
-
-        # If the LLM didn't call notify(), still surface the best estimated deal in the UI.
-        if self.opportunity is None and self.last_selection and self.estimates_by_description:
-            best = None
-            best_discount = float("-inf")
-            best_estimate = None
-            for deal in self.last_selection.deals:
-                estimate = self.estimates_by_description.get(deal.product_description)
-                if estimate is None:
-                    continue
-                discount = float(estimate) - float(deal.price)
-                if discount > best_discount:
-                    best = deal
-                    best_discount = discount
-                    best_estimate = float(estimate)
-
-            if best is not None and best_estimate is not None:
-                self.log(
-                    "Autonomous Planning Agent did not notify; recording best deal for UI/memory."
-                )
-                self.opportunity = Opportunity(
-                    deal=Deal(
-                        product_description=best.product_description,
-                        price=float(best.price),
-                        url=best.url,
-                    ),
-                    estimate=float(best_estimate),
-                    discount=float(best_discount),
-                )
-
         return self.opportunity
-

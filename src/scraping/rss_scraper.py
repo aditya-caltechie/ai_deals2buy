@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from typing import Dict, List, Self
 
@@ -9,6 +10,8 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from scraping.html_parser import extract_deal_snippet
+
+logger = logging.getLogger(__name__)
 
 feeds = [
     "https://www.dealnews.com/c142/Electronics/?rss=1",
@@ -36,15 +39,49 @@ class ScrapedDeal:
         self.title = entry["title"]
         self.summary = extract_deal_snippet(entry["summary"])
         self.url = entry["links"][0]["href"]
-        stuff = requests.get(self.url).content
-        soup = BeautifulSoup(stuff, "html.parser")
-        content = soup.find("div", class_="content-section").get_text()
-        content = content.replace("\nmore", "").replace("\n", " ")
-        if "Features" in content:
-            self.details, self.features = content.split("Features", 1)
-        else:
-            self.details = content
+        self.details = ""
+        self.features = ""
+
+        # DealNews page layouts change over time; avoid crashing the whole run when
+        # a specific selector isn't present or a request fails.
+        try:
+            resp = requests.get(
+                self.url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X) ai-deals2buy/1.0"
+                },
+                timeout=20,
+            )
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.content, "html.parser")
+
+            # Historically this lived in: <div class="content-section">...</div>
+            node = soup.find("div", class_="content-section")
+            if node is None:
+                # Try common content containers before falling back to a full-page scrape.
+                node = soup.find("main") or soup.find("article")
+
+            content = (
+                node.get_text(" ", strip=True)
+                if node is not None
+                else soup.get_text(" ", strip=True)
+            )
+            content = content.replace(" more", " ").replace("\n", " ").strip()
+
+            if not content:
+                # Fallback: at least include RSS summary so LLM can still select deals.
+                content = self.summary
+
+            if "Features" in content:
+                self.details, self.features = content.split("Features", 1)
+            else:
+                self.details = content
+                self.features = ""
+        except Exception as e:
+            logger.warning("Failed to scrape deal page %s (%s). Using RSS summary.", self.url, e)
+            self.details = self.summary
             self.features = ""
+
         self.truncate()
 
     def truncate(self):
@@ -76,7 +113,14 @@ class ScrapedDeal:
         for feed_url in feed_iter:
             feed = feedparser.parse(feed_url)
             for entry in feed.entries[:10]:
-                deals.append(cls(entry))
+                try:
+                    deals.append(cls(entry))
+                except Exception as e:
+                    logger.warning(
+                        "Skipping RSS entry due to scrape/parse failure (%s): %s",
+                        feed_url,
+                        e,
+                    )
                 time.sleep(0.05)
         return deals
 

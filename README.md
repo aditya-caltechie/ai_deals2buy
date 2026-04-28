@@ -33,9 +33,10 @@ This repo runs as a regular Python app (not an installed package). The code live
 ### Requirements
 
 - Python 3.11–3.13 (Python 3.14 is not supported yet; some deps like `onnxruntime` don’t ship 3.14 wheels)
-- Optional but recommended:
-  - Ollama running locally for preprocessing (default base URL: `http://localhost:11434`)
-  - Modal configured if you want to use the hosted fine-tuned specialist model
+- Optional (depending on which parts you want to run):
+  - **Ollama** running locally for preprocessing (default base URL: `http://localhost:11434`)
+  - **Modal** configured if you want to use the hosted fine-tuned specialist model
+  - **Pushover** credentials if you want push notifications
 
 ### Install + run (uv-only)
 
@@ -67,17 +68,17 @@ uv sync
 Create a `.env` in the repo root. Common keys:
 
 - OpenAI: `OPENAI_API_KEY` (used by `ScannerAgent`, `FrontierAgent`, `AutonomousPlanningAgent`)
-- Pushover (push notifications): `PUSHOVER_USER`, `PUSHOVER_TOKEN`
-- Groq (via LiteLLM): `GROQ_API_KEY` (recommended if using `groq/openai/gpt-oss-20b`)
-- HuggingFace (vector DB dataset download): `HF_TOKEN`
+- HuggingFace (vector DB dataset download): `HF_TOKEN` (only needed for `--build-vectordb`)
+- Pushover (push notifications): `PUSHOVER_USER`, `PUSHOVER_TOKEN` (only needed to actually send pushes)
+- Groq (via LiteLLM): `GROQ_API_KEY` (only needed for notification copywriting via Groq)
 - Dataset source override (optional): `HF_DATASET_USER` (defaults to `ed-donner`)
 - Planner selection: `PLANNER_MODE=workflow` or `PLANNER_MODE=autonomous`
 - Preprocessor model (optional): `PRICER_PREPROCESSOR_MODEL` (default `ollama/llama3.2`)
 
 Notes:
 
-- You can run the UI without Pushover/Groq, but you'll lose push notifications (and message crafting).
-- If you enable the Modal-backed specialist estimator, you must have Modal configured locally (`modal` CLI auth + access to the deployed app).
+- You can run the UI without Pushover/Groq; you’ll just lose push notifications (and message crafting).
+- The ensemble pricer **always** runs three steps in code: preprocessing → specialist (Modal) → frontier (OpenAI RAG), then combines them. If you don’t have Modal/Ollama configured, those calls can fail (see troubleshooting below).
 
 #### 5) Run the app (Gradio UI)
 
@@ -130,7 +131,7 @@ uv run python -m rag.vectorstore --force      # delete and recreate collection f
 When you run `src/main.py` it:
 
 - loads env vars
-- resets persisted memory
+- truncates persisted memory to the first 2 entries (dev/demo convenience; see troubleshooting)
 - optionally builds the vector DB
 - launches the Gradio UI
 
@@ -201,6 +202,10 @@ See `tests/README.md` for details on what is covered.
 ## Notes / troubleshooting
 
 - If `uv sync` fails on macOS 13 arm64 with a Torch wheel error, it’s due to upstream `torch` wheel availability; this repo pins Torch to `<2.10.0` to keep installs working.
-- The 3D plot uses t-SNE; it needs at least 31 items in the vector DB.
-- `memory.json` stores surfaced opportunities so you don't alert on the same deal repeatedly.
-- If you don't have Modal configured, the `SpecialistAgent` will fail to connect; use `docs/README.md` to decide whether to stub/disable it for local-only runs.
+- The 3D plot uses t-SNE; it needs at least **31** items in the vector DB.
+- The plot is a Plotly 3D trace and requires **WebGL**. If you see “WebGL is not supported”, open the UI in Chrome/Firefox and ensure hardware acceleration is enabled.
+- Memory is stored in `src/memory.json`. The UI table shows whatever is currently in memory.
+  - On startup, `src/main.py` calls `DealAgentFramework.reset_memory()` which **keeps the first 2 entries** (so you may see “old deals” even before the first run completes).
+  - To fully clear the table/history, delete `src/memory.json` (or set it to `[]`) and restart.
+- The DealNews scraper depends on DealNews page HTML structure. If DealNews changes layout, scraping may fail; the scraper should skip/fallback rather than crash, but you may see fewer deals.
+- If you don't have Modal configured, the `SpecialistAgent` may fail at init or on first remote call. For local-only runs, either configure Modal or temporarily comment out specialist usage in `src/agents/pricing/ensemble_agent.py`.
