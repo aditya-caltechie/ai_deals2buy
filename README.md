@@ -201,11 +201,13 @@ See `tests/README.md` for details on what is covered.
 
 ## Notes / troubleshooting
 
-- If `uv sync` fails on macOS 13 arm64 with a Torch wheel error, it’s due to upstream `torch` wheel availability; this repo pins Torch to `<2.10.0` to keep installs working.
-- The 3D plot uses t-SNE; it needs at least **31** items in the vector DB.
-- The plot is a Plotly 3D trace and requires **WebGL**. If you see “WebGL is not supported”, open the UI in Chrome/Firefox and ensure hardware acceleration is enabled.
-- Memory is stored in `src/memory.json`. The UI table shows whatever is currently in memory.
-  - On startup, `src/main.py` calls `DealAgentFramework.reset_memory()` which **keeps the first 2 entries** (so you may see “old deals” even before the first run completes).
-  - To fully clear the table/history, delete `src/memory.json` (or set it to `[]`) and restart.
-- The DealNews scraper depends on DealNews page HTML structure. If DealNews changes layout, scraping may fail; the scraper should skip/fallback rather than crash, but you may see fewer deals.
-- If you don't have Modal configured, the `SpecialistAgent` may fail at init or on first remote call. For local-only runs, either configure Modal or temporarily comment out specialist usage in `src/agents/pricing/ensemble_agent.py`.
+- The 3D plot uses t-SNE; it needs at least 31 items in the vector DB.
+- `memory.json` stores surfaced opportunities so you don't alert on the same deal repeatedly.
+- If you don't have Modal configured, the `SpecialistAgent` will fail to connect; use `docs/README.md` to decide whether to stub/disable it for local-only runs.
+
+## Reference
+- https://github.com/aditya-caltechie/ai-langchain-intro
+- https://github.com/aditya-caltechie/ai-fine-tuning
+- https://github.com/aditya-caltechie/ai-deep-learning
+- https://github.com/aditya-caltechie/ai-rag
+
