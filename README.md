@@ -1,6 +1,6 @@
 # ai-deals2buy (The Price is Right)
 
-[![CI](https://github.com/aditya-caltechie/ai-deals2buy/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya-caltechie/ai-deals2buy/actions/workflows/ci.yml)
+[![CI](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml)
 
 An agentic deal-hunting system that estimates a product's "true value" and alerts you when the discount is large enough. It ships with a Gradio UI and a small set of cooperating agents.
 
