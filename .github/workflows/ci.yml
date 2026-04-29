@@ -6,33 +6,23 @@ on:
   pull_request:
     branches: [main]
 
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
-  tests:
-    name: Tests (Python ${{ matrix.python-version }})
+  test:
+    name: Tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up uv + Python
+      - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: ${{ matrix.python-version }}
           enable-cache: true
 
-      - name: Install dependencies (locked)
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
         run: uv sync --locked
 
       - name: Run tests
