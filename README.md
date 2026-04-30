@@ -8,9 +8,15 @@ For architecture and the full end-to-end flow, see `docs/README.md`. For a contr
 
 ## Architecture
 
-Deals are **scraped** and shortlisted; the **ensemble** estimates true price using a **fine-tuned** specialist (Modal), **RAG** retrieval over the product vector DB (frontier), and an optional **neural** model. The pipeline compares those estimates to the scaped deal price to decide if it is a **real** discount, then **notifies** you via push.
+Deals are **scraped** and shortlisted; the **ensemble** estimates true price using a **fine-tuned** specialist (Modal), **RAG** retrieval over the product vector DB (frontier), and an optional **neural** model. The pipeline compares those estimates to the scraped deal price to decide if it is a **real** discount, then **notifies** you via push.
 
 ![Agent workflow — UI, framework, planner, scanner, ensemble, specialist, frontier (RAG), NN, messaging](docs/images/agent_workflow.svg)
+
+How it fits together:
+
+- **Main spine (left → right):** **`DealAgentFramework`** runs under Gradio; **`PlanningAgent`** orchestrates tools; **`EnsembleAgent`** fuses **`FrontierAgent`** (RAG), **`SpecialistAgent`** (fine-tuned), and optionally **`NeuralNetworkAgent`** into one estimate—the same horizontal chain as the SVG (through ensemble → specialist).
+- **Planner fan-out:** **`PlanningAgent`** calls **`ScannerAgent`** (scrape/shortlist), **`EnsembleAgent`** (pricing), and **`MessagingAgent`** (push notification).
+- **Real deal:** compare ensemble **true value** to the **scraped** price; a large enough **discount** triggers notification per planner rules and threshold.
 
 ## What it does
 
