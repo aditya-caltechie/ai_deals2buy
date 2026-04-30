@@ -108,7 +108,7 @@ uv run python -m rag.vectorstore --full       # items_full
 uv run python -m rag.vectorstore --force      # delete and recreate collection first
 ```
 
-## Models and providers (as implemented)
+## Models and providers
 
 - Deal selection + summarization: OpenAI `gpt-5-mini` via `openai` SDK (`ScannerAgent`)
 - Tool-loop planner (autonomous mode): OpenAI `gpt-5.1` via `openai` SDK (`AutonomousPlanningAgent`)
