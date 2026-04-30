@@ -1,4 +1,4 @@
-# ai-deals2buy (The Price is Right)
+# ai-deals2buy 
 
 [![CI](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml?query=branch%3Amain)
 
