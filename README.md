@@ -21,67 +21,6 @@ On a repeating schedule, the app:
 
 This repo runs as a regular Python app (not an installed package). The code lives in `src/`.
 
-## Diagrams
-
-Architecture (high level):
-
-![End-to-end workflow](docs/images/agent_workflow.svg)
-
-```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ USER INTERFACE                                                               │
-│   Gradio UI (src/ui/app.py)                                                  │
-│   - runs on startup + every 5 minutes (gr.Timer)                             │
-└───────────────────────────────────────────┬──────────────────────────────────┘
-                                            │ triggers run
-                                            v
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ ORCHESTRATION                                                                │
-│   DealAgentFramework (src/core/framework.py)                                 │
-│   - loads/writes memory: src/memory.json                                     │
-│   - opens vector DB: products_vectorstore/ (Chroma, collection: products)    │
-│   - selects planner: PLANNER_MODE=workflow|autonomous                        │
-└───────────────────────────────────────────┬──────────────────────────────────┘
-                                            │ plans + coordinates
-                                            v
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ AGENTS                                                                       │
-│   ScannerAgent                                                               │
-│   - RSS scrape + OpenAI Structured Outputs -> DealSelection (top 5 deals)    │
-│                                                                              │
-│   EnsembleAgent (true-value estimator)                                       │
-│   - Preprocessor (LiteLLM; optional local Ollama)                            │
-│   - FrontierAgent (RAG: ChromaDB retrieval + OpenAI price estimate)          │
-│   - SpecialistAgent (Modal fine-tuned pricer)                                │
-│   - NeuralNetworkAgent (optional; currently disabled in code)                │
-│                                                                              │
-│   MessagingAgent                                                             │
-│   - craft copy via Groq (LiteLLM) -> send push via Pushover                  │
-└───────────────────────────────────────────┬──────────────────────────────────┘
-                                            │ reads/writes + calls services
-                                            v
-┌───────────────────────────────────────────┐     ┌───────────────────────────────────────────┐
-│ STATE / STORAGE                           │     │ EXTERNAL SERVICES / MODELS                │
-│   src/memory.json                         │     │   OpenAI (ScannerAgent)                   │
-│   - persisted opportunities (dedupe)      │     │   - deal selection (Structured Outputs)   │
-│                                           │     │                                           │
-│   ChromaDB (persistent)                   │     │   OpenAI (FrontierAgent)                  │
-│   - products_vectorstore/                 │     │   - frontier pricing with RAG context     │
-│   - collection: products                  │     │                                           │
-│   - used for RAG + UI 3D plot             │     │   Modal (SpecialistAgent)                 │
-│                                           │     │   - fine-tuned specialist pricing model   │
-│                                           │     │                                           │
-│                                           │     │   Ollama (Preprocessor, optional local)   │
-│                                           │     │   - rewrite/normalize product text        │
-│                                           │     │                                           │
-│                                           │     │   Groq (MessagingAgent) + Pushover        │
-│                                           │     │   - craft message + deliver push          │
-└───────────────────────────────────────────┘     └───────────────────────────────────────────┘
-```
-
-- For a written walk-through of the components and responsibilities, see `architecture.md`.
-- For the step-by-step runtime flow (UI timer → agents → notification → persistence), see `workflow-e2e.md`.
-
 ## Quick start
 
 ### Requirements
@@ -250,26 +189,3 @@ Run a single module:
 uv run python -m unittest -v tests.integration.test_framework
 uv run python -m unittest -v tests.unit.test_agents
 ```
-
-See `tests/README.md` for details on what is covered.
-
-## Notes / troubleshooting
-
-- The 3D plot uses t-SNE; it needs at least 31 items in the vector DB.
-- `memory.json` stores surfaced opportunities so you don't alert on the same deal repeatedly.
-- If you don't have Modal configured, the `SpecialistAgent` will fail to connect; use `docs/README.md` to decide whether to stub/disable it for local-only runs.
-
-## Reference
-- https://github.com/aditya-caltechie/ai-langchain-intro
-- https://github.com/aditya-caltechie/ai-fine-tuning
-- https://github.com/aditya-caltechie/ai-deep-learning
-- https://github.com/aditya-caltechie/ai-rag
-
-#### Focus:
-- Ensemble Agent. All three agents.
-- Specially Specialist Agent - How deployed fine-tuned model on modal.com and used for inference.
-- Fine tuned using peft (LoraConfig) and trl (SFTTrainer) on T4 and then deployed to Modal. See [week-7](https://github.com/aditya-caltechie/ai-tutorial-notes/blob/main/llm-core/Week-7%20(fine-tuning).docx) and [week-8](https://github.com/aditya-caltechie/ai-tutorial-notes/blob/main/llm-core/Week-8%20(Capstone-project).docx)
-- Inference for price prediction. [Code](https://github.com/aditya-caltechie/ai-fine-tuning/tree/main/src/udemy) 
-- Frontiner model with RAG
-- Optional NN model for price detection.
-- Concept of Workflows, Agents
