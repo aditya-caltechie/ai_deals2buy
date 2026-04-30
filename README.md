@@ -108,32 +108,6 @@ uv run python -m rag.vectorstore --full       # items_full
 uv run python -m rag.vectorstore --force      # delete and recreate collection first
 ```
 
-## How it works (at a glance)
-
-When you run `src/main.py` it:
-
-- loads env vars
-- truncates persisted memory to the first 2 entries (dev/demo convenience; see troubleshooting)
-- optionally builds the vector DB
-- launches the Gradio UI
-
-The UI (`src/ui/app.py`) runs the agent pipeline on startup and then every 5 minutes via `gr.Timer`.
-
-Core orchestration happens in `src/core/framework.py`:
-
-- loads previous surfaced opportunities from `memory.json`
-- opens Chroma DB `products_vectorstore/` (collection `products`)
-- chooses one of two planner modes via `PLANNER_MODE`
-
-### Planner modes
-
-Both modes use the same underlying agents (`ScannerAgent`, `EnsembleAgent`, `MessagingAgent`) but orchestrate them differently:
-
-- Workflow mode (`PLANNER_MODE=workflow`): deterministic pipeline in `src/agents/planners/planning_agent.py`
-  - scan -> price top 5 -> pick best -> notify if `discount > PlanningAgent.DEAL_THRESHOLD`
-- Tool-loop mode (`PLANNER_MODE=autonomous`, default): LLM function-calling loop in `src/agents/planners/autonomous_planning_agent.py`
-  - the planner LLM decides which tool to call next (scan / estimate / notify) until it finishes
-
 ## Models and providers (as implemented)
 
 - Deal selection + summarization: OpenAI `gpt-5-mini` via `openai` SDK (`ScannerAgent`)
