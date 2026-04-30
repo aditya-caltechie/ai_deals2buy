@@ -1,10 +1,16 @@
 # ai-deals2buy (The Price is Right)
 
-[![CI](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml)
+[![CI](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aditya-caltechie/ai_deals2buy/actions/workflows/ci.yml?query=branch%3Amain)
 
 An agentic deal-hunting system that estimates a product's "true value" and alerts you when the discount is large enough. It ships with a Gradio UI and a small set of cooperating agents.
 
 For architecture and the full end-to-end flow, see `docs/README.md`. For a contributor-oriented code map, see `AGENTS.md`.
+
+## Architecture
+
+Deals are **scraped** and shortlisted; the **ensemble** estimates true price using a **fine-tuned** specialist (Modal), **RAG** retrieval over the product vector DB (frontier), and an optional **neural** model. The pipeline compares those estimates to the scaped deal price to decide if it is a **real** discount, then **notifies** you via push.
+
+![Agent workflow — UI, framework, planner, scanner, ensemble, specialist, frontier (RAG), NN, messaging](docs/images/agent_workflow.svg)
 
 ## What it does
 

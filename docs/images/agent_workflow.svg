@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-label="Agent Workflows">
+  <defs>
+    <style>
+      .bg { fill: #07080c; }
+      .title { font: 500 44px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #f3f4f6; }
+      .name { font: 600 18px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #e5e7eb; }
+      .desc { font: 500 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #9ca3af; }
+      .arrow { stroke: rgba(255,255,255,0.38); stroke-width: 6; fill: none; stroke-linecap: round; }
+      .arrow-thin { stroke-width: 5; }
+      .blue { stroke: #2f80ed; }
+      .orange { stroke: #fb923c; }
+      .pink { stroke: #fb7185; }
+      .teal { stroke: #22d3ee; }
+      .yellow { stroke: #fbbf24; }
+      .red { stroke: #f87171; }
+      .gold { stroke: #f59e0b; }
+      .purple { stroke: #c4b5fd; }
+    </style>
+
+    <!-- Slightly bigger arrowheads -->
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8.6" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.55)"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="520" class="bg"/>
+
+  <text x="700" y="78" text-anchor="middle" class="title">Agent Workflows</text>
+
+  <!-- Left spine icons + labels (matching code names) -->
+
+  <!-- UI icon (simple monitor) -->
+  <g transform="translate(110,250)">
+    <rect x="-34" y="-26" width="68" height="46" rx="6" fill="none" class="blue" stroke-width="5"/>
+    <path d="M -14 28 H 14" fill="none" class="blue" stroke-width="5" stroke-linecap="round"/>
+    <path d="M -22 20 H 22" fill="none" class="blue" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="110" y="322" text-anchor="middle" class="name">The UI</text>
+  <text x="110" y="345" text-anchor="middle" class="desc">In Gradio</text>
+
+  <!-- Framework icon (< />) -->
+  <g transform="translate(320,250)">
+    <path d="M -26 0 L -6 -20 M -26 0 L -6 20" fill="none" class="gold" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 26 0 L 6 -20 M 26 0 L 6 20" fill="none" class="gold" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M -2 -26 L -16 26" fill="none" class="gold" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <text x="320" y="322" text-anchor="middle" class="name">DealAgentFramework</text>
+  <text x="320" y="345" text-anchor="middle" class="desc">Memory, logging</text>
+
+  <!-- Planning icon (board) -->
+  <g transform="translate(540,250)">
+    <rect x="-28" y="-28" width="56" height="56" rx="8" fill="none" class="orange" stroke-width="5"/>
+    <path d="M -14 -10 H 14 M -14 6 H 10" fill="none" class="orange" stroke-width="5" stroke-linecap="round"/>
+    <path d="M -10 -22 H 10" fill="none" class="orange" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="540" y="322" text-anchor="middle" class="name">PlanningAgent</text>
+  <text x="540" y="345" text-anchor="middle" class="desc">Coordinates activities</text>
+
+  <!-- Ensemble icon (ring) -->
+  <g transform="translate(820,250)">
+    <circle cx="0" cy="0" r="22" fill="none" class="pink" stroke-width="6"/>
+    <path d="M 0 -34 V -26 M 0 26 V 34 M -34 0 H -26 M 26 0 H 34" fill="none" class="pink" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <text x="820" y="322" text-anchor="middle" class="name">EnsembleAgent</text>
+  <text x="820" y="345" text-anchor="middle" class="desc">Estimates prices</text>
+
+  <!-- Specialist icon (device) -->
+  <g transform="translate(1080,250)">
+    <rect x="-28" y="-26" width="56" height="52" rx="8" fill="none" class="red" stroke-width="5"/>
+    <path d="M -12 -6 H 12 M 0 -18 V -6" fill="none" class="red" stroke-width="5" stroke-linecap="round"/>
+    <path d="M -14 10 H 14" fill="none" class="red" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="1080" y="322" text-anchor="middle" class="name">SpecialistAgent</text>
+  <text x="1080" y="345" text-anchor="middle" class="desc">Estimates prices</text>
+
+  <!-- Main arrows -->
+  <path d="M 170 250 H 250" class="arrow" marker-end="url(#ah)"/>
+  <path d="M 380 250 H 470" class="arrow" marker-end="url(#ah)"/>
+  <path d="M 600 250 H 740" class="arrow" marker-end="url(#ah)"/>
+  <!-- Ensemble -> Specialist (main spine) -->
+  <path d="M 880 250 H 1052" class="arrow" marker-end="url(#ah)"/>
+
+  <!-- Top workflow: Scanner -> Frontier -->
+  <!-- Scanner (funnel) -->
+  <g transform="translate(820,150)">
+    <path d="M -18 -22 H 18 L 6 -4 V 8 L -6 18 V -4 Z" fill="none" class="teal" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="-10" cy="-34" r="3" fill="none" class="teal" stroke-width="4"/>
+    <circle cx="0" cy="-38" r="3" fill="none" class="teal" stroke-width="4"/>
+    <circle cx="10" cy="-34" r="3" fill="none" class="teal" stroke-width="4"/>
+  </g>
+  <text x="820" y="204" text-anchor="middle" class="name">Scanner Agent</text>
+  <text x="820" y="228" text-anchor="middle" class="desc">Identifies promising deals</text>
+
+  <!-- Frontier (brain-ish cloud) -->
+  <g transform="translate(1110,150)">
+    <path d="M -22 6
+             C -36 6, -36 -10, -24 -12
+             C -26 -28, -6 -32, 0 -20
+             C 10 -30, 28 -22, 20 -6
+             C 32 -2, 30 12, 16 12
+             C 10 22, -8 20, -10 10
+             C -14 14, -22 12, -22 6 Z"
+          fill="none" class="pink" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <text x="1110" y="204" text-anchor="middle" class="name">Frontier Agent</text>
+  <text x="1110" y="228" text-anchor="middle" class="desc">RAG pricer</text>
+
+  <!-- Note: Frontier pricing is called by EnsembleAgent (not ScannerAgent). -->
+
+  <!-- Bottom: Messaging + Neural Network -->
+  <!-- Messaging (megaphone) -->
+  <g transform="translate(820,395)">
+    <path d="M -22 0 L 6 -14 V 14 L -22 0 Z" fill="none" class="yellow" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 10 -10 C 22 -4, 22 4, 10 10" fill="none" class="yellow" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="820" y="448" text-anchor="middle" class="name">Messaging Agent</text>
+  <text x="820" y="472" text-anchor="middle" class="desc">Sends push notifications</text>
+
+  <!-- Neural network (trees-ish) -->
+  <g transform="translate(1110,395)">
+    <path d="M -10 18 V -18 M -10 -6 L -18 4 M -10 -10 L -22 -2" fill="none" class="purple" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 10 18 V -18 M 10 -6 L 18 4 M 10 -10 L 22 -2" fill="none" class="purple" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="1110" y="448" text-anchor="middle" class="name">Neural Network Agent</text>
+  <text x="1110" y="472" text-anchor="middle" class="desc">Estimates prices</text>
+
+  <!-- Branch arrows from PlanningAgent -->
+  <!-- Planning -> Scanner (route above labels, land on scanner icon centerline) -->
+  <path d="M 540 205 V 120 H 820 V 140" class="arrow arrow-thin" marker-end="url(#ah)"/>
+  <!-- Planning -> Messaging (route below ensemble labels, land on messaging icon centerline) -->
+  <path d="M 540 295 V 430 H 820 V 410" class="arrow arrow-thin" marker-end="url(#ah)"/>
+  <!-- Ensemble -> Frontier (pricing call; route above top lane) -->
+  <path d="M 880 250 V 135 H 1088 V 150" class="arrow arrow-thin" marker-end="url(#ah)"/>
+  <!-- Ensemble -> Neural Network (pricing call) -->
+  <path d="M 880 250 V 395 H 1088" class="arrow arrow-thin" marker-end="url(#ah)"/>
+</svg>
