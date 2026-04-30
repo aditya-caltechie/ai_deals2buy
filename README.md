@@ -12,27 +12,6 @@ Deals are **scraped** and shortlisted; the **ensemble** estimates true price usi
 
 ![Agent workflow — UI, framework, planner, scanner, ensemble, specialist, frontier (RAG), NN, messaging](docs/images/agent_workflow.svg)
 
-How it fits together:
-
-- **Main spine (left → right):** **`DealAgentFramework`** runs under Gradio; **`PlanningAgent`** orchestrates tools; **`EnsembleAgent`** fuses **`FrontierAgent`** (RAG), **`SpecialistAgent`** (fine-tuned), and optionally **`NeuralNetworkAgent`** into one estimate—the same horizontal chain as the SVG (through ensemble → specialist).
-- **Planner fan-out:** **`PlanningAgent`** calls **`ScannerAgent`** (scrape/shortlist), **`EnsembleAgent`** (pricing), and **`MessagingAgent`** (push notification).
-- **Real deal:** compare ensemble **true value** to the **scraped** price; a large enough **discount** triggers notification per planner rules and threshold.
-
-## What it does
-
-On a repeating schedule, the app:
-
-- Scrapes deal RSS feeds (DealNews)
-- Uses an LLM to select and summarize the best deals with a clear numeric price
-- Estimates a "true value" using an ensemble:
-  - Specialist model: a fine-tuned Llama 3.2 3B hosted on Modal
-  - Frontier model: an OpenAI model using RAG over a Chroma vector DB
-  - Optional local preprocessing via Ollama
-- Computes discount = estimated value - deal price
-- Sends a push notification when a deal crosses a threshold
-
-This repo runs as a regular Python app (not an installed package). The code lives in `src/`.
-
 ## Quick start
 
 ### Requirements
