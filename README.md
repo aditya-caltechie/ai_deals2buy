@@ -4,11 +4,9 @@
 
 An agentic deal-hunting system that estimates a product's "true value" and alerts you when the discount is large enough. It ships with a Gradio UI and a small set of cooperating agents.
 
-For architecture and the full end-to-end flow, see `docs/README.md`. For a contributor-oriented code map, see `AGENTS.md`.
+Deals are **scraped** and shortlisted; the **ensemble** estimates true price using a **fine-tuned** specialist (Modal), **RAG** retrieval over the product vector DB (frontier), and an optional **neural** model. The pipeline compares those estimates to the scraped deal price to decide if it is a **real** discount, then **notifies** you via push.
 
 ## Architecture
-
-Deals are **scraped** and shortlisted; the **ensemble** estimates true price using a **fine-tuned** specialist (Modal), **RAG** retrieval over the product vector DB (frontier), and an optional **neural** model. The pipeline compares those estimates to the scraped deal price to decide if it is a **real** discount, then **notifies** you via push.
 
 ![Agent workflow — UI, framework, planner, scanner, ensemble, specialist, frontier (RAG), NN, messaging](docs/images/agent_workflow.svg)
 
