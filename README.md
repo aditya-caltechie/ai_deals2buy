@@ -128,14 +128,6 @@ uv run python -m rag.vectorstore --force      # delete and recreate collection f
 - ML/vis: scikit-learn (t-SNE for 3D plot), NumPy
 - Serving specialist model: Modal + Transformers + PEFT + bitsandbytes
 
-## Repo layout (high level)
-
-- `src/main.py`: CLI entrypoint (dotenv, reset memory, optional vector DB build, launch UI)
-- `src/ui/app.py`: Gradio app + timer-driven runs + 3D embedding visualization
-- `src/core/framework.py`: orchestrator, planner selection, Chroma + memory persistence, t-SNE plot data
-- `src/agents/`: agent implementations (scanner, planners, pricing ensemble, notifications, vector DB builder)
-- `src/services/modal/`: Modal app(s) used to host the fine-tuned specialist model
-
 ## Tests
 
 This repo uses lightweight `unittest` + `unittest.mock` tests (no extra test dependencies).
